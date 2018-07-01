@@ -12,37 +12,35 @@ public class PlayerMovement : MonoBehaviour
     private float jumpPower = 10;
     private float preY;
     private bool isJump;
+    [SerializeField]
+    private Camera camera;
+    private int buttonClicked;
 
     void Awake()
     {
         rb = this.GetComponent<Rigidbody>();
+        buttonClicked = 0;
     }
+
+
 
     private void Update()
     {
         transform.Translate(Vector3.forward * playerSpeed);
-        if (Input.touchCount > 0)
+        if (Input.GetMouseButtonDown(0))
         {
-            if (Input.GetTouch(0).position.x < this.transform.position.x)
+            if (Input.mousePosition.x > camera.WorldToScreenPoint(this.transform.position).x && buttonClicked < 1)
             {
-                transform.position = transform.position - transform.right;
+                this.transform.position = this.transform.position + transform.right;
+                buttonClicked++;
             }
-            if (Input.GetTouch(0).position.x > this.transform.position.x)
+            if((Input.mousePosition.x < camera.WorldToScreenPoint(this.transform.position).x && buttonClicked > -1))
             {
-                transform.position = transform.position + transform.right;
+                this.transform.position = this.transform.position - transform.right;
+                buttonClicked--;
             }
-            if (Input.GetTouch(0).phase == TouchPhase.Began)
-            {
-                preY = Input.GetTouch(0).position.y;
-                if (Input.GetTouch(0).phase == TouchPhase.Ended)
-                isJump = true;
-                float currY = Input.GetTouch(0).position.y;
-
-            }
-
-
-
         }
+          
 
     }
 
@@ -57,8 +55,10 @@ public class PlayerMovement : MonoBehaviour
     IEnumerator PlayerJump()
     {
         if (Physics.Raycast(transform.position, -transform.up, 0.5f))
+        {
             rb.AddForce(transform.up * jumpPower, ForceMode.Impulse);
-        isJump = false;
+            isJump = false;
+        }
         yield return null;
     }
 }
